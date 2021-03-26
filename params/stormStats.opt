@@ -1,0 +1,60 @@
+/**********************************************************************
+ * TDRP params for ./stormStats
+ **********************************************************************/
+
+//======================================================================
+//
+// The idea of stormStats is that it will read a Titan
+// database and write text files representing the storms 
+// tracked by the Titan system.
+//
+// This can be done in realtime or archive mode. The program
+// was developed to allow the transfer of Titan data to
+// users outside of NCAR. The program does very little, if any,
+// translation or thresholding of the data - for instance, there
+// is no ability to only print data with an area greater than
+// a certain area. The outside user is expected to do that.
+//
+// Units for speed are Km/Hr, area is square Km, and times
+// are GMT.
+//
+// Niles Oien May 2003, modified by T. Raupach 2018.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Set to print more messages as data are processed.
+//
+// Can usually be FALSE.
+//
+//
+// Type: boolean
+//
+
+debug = TRUE;
+
+///////////// Instance ////////////////////////////////
+//
+// Instance to check in to Procmap with.
+//
+// Set to something unique.
+//
+//
+// Type: string
+//
+
+Instance = "primary";
+
+///////////// outDir //////////////////////////////////
+//
+// Output directory.
+//
+// Output file(s) written here. .
+//
+//
+// Type: string
+//
+
+outDir = "./tracks/";
+

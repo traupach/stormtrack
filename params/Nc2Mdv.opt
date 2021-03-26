@@ -1,0 +1,320 @@
+/**********************************************************************
+ * TDRP params for ../Nc2Mdv/Nc2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// Nc2Mdv converts NetCDF files to MDV format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with procmap while running.
+//
+// See 'instance'.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// reg_interval ////////////////////////////
+//
+// Registration interval.
+//
+// The number of seconds between expected procmap registrations.
+//
+//
+// Type: int
+//
+
+reg_interval = 60;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// NETCDF dimensions.
+//
+// Specify the names used in the netCDF file for dimensions, since they 
+//   can vary depending on the application used to create the file.
+//
+//======================================================================
+ 
+///////////// netcdf_dim_time /////////////////////////
+//
+// name for netCDF dimension for time.
+//
+//
+// Type: string
+//
+
+netcdf_dim_time = "Time";
+
+///////////// netcdf_dim_x ////////////////////////////
+//
+// netCDF dimension name for grid points in longitude.
+//
+//
+// Type: string
+//
+
+netcdf_dim_x = "lon";
+
+///////////// netcdf_dim_y ////////////////////////////
+//
+// netCDF dimension name for grid points in latitude.
+//
+//
+// Type: string
+//
+
+netcdf_dim_y = "lat";
+
+///////////// netcdf_dim_z ////////////////////////////
+//
+// netCDF dimension name for grid points in altitude.
+//
+//
+// Type: string
+//
+
+netcdf_dim_z = "interp_levels";
+
+//======================================================================
+//
+// NETCDF variables.
+//
+// Specify the names used in the netCDF file for variables, since they 
+//   can vary depending on the application used to create the file.
+//
+//======================================================================
+ 
+///////////// netcdf_var_base_time ////////////////////
+//
+// Data set times are relative to this base time.
+//
+// Specify 'none' if there is no base time variable. In this case the 
+//   time will be taken as absolute, using the units specified in the 
+//   file.
+//
+//
+// Type: string
+//
+
+netcdf_var_base_time = "none";
+
+///////////// base_time_string ////////////////////////
+//
+// Base time string - used if netcdf_var_base_time is set to 'none'.
+//
+// Set this to a W3C ISO 8601 time - see 
+//   http://www.w3.org/TR/NOTE-datetime.
+//
+//
+// Type: string
+//
+
+base_time_string = "1970-01-01T00:00:00Z";
+
+///////////// netcdf_var_time_offset //////////////////
+//
+// Time offset relative to base_time, or unix_time if base_time is 
+//   'none'.
+//
+//
+// Type: string
+//
+
+netcdf_var_time_offset = "time";
+
+///////////// netcdf_var_z ////////////////////////////
+//
+// Z variable name.
+//
+//
+// Type: string
+//
+
+netcdf_var_z = "interp_levels";
+
+///////////// netcdf_var_y ////////////////////////////
+//
+// Y variable name.
+//
+//
+// Type: string
+//
+
+netcdf_var_y = "lat";
+
+///////////// netcdf_var_x ////////////////////////////
+//
+// X variable name.
+//
+//
+// Type: string
+//
+
+netcdf_var_x = "lon";
+
+///////////// treat_ncbyte_as_unsigned ////////////////
+//
+// Option to consider ncbyte fields as unsigned.
+//
+// Normally ncbyte fields are signed. If this field is set to TRUE, they 
+//   are treated as unsigned instead.
+//
+//
+// Type: boolean
+//
+
+treat_ncbyte_as_unsigned = FALSE;
+
+//======================================================================
+//
+// INPUT PROJECTION.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// OUTPUT LOCATION.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for writing output files.
+//
+//
+// Type: string
+//
+
+output_url = "mdvp:://localhost::mdv";
+
+//======================================================================
+//
+// OUTPUT ENCODING AND COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_encoding_type ////////////////////
+//
+// Set output encoding type.
+//
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_INT16;
+
+///////////// output_compression_type /////////////////
+//
+// Set output compression type.
+//
+// See <toolsa/compress> for details on the compression types.
+//
+//
+// Type: enum
+// Options:
+//     COMPRESSION_NONE
+//     COMPRESSION_RLE
+//     COMPRESSION_LZO
+//     COMPRESSION_ZLIB
+//     COMPRESSION_BZIP
+//     COMPRESSION_GZIP
+//     COMPRESSION_GZIP_VOL
+//
+
+output_compression_type = COMPRESSION_GZIP;
+
+//======================================================================
+//
+// OUTPUT METADATA STRINGS.
+//
+// These will be used if the file does not contain suitable information.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Name of data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_name = "WRF output";
+
+///////////// data_set_source /////////////////////////
+//
+// Source of data.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_source = "University of Bern";
+
+///////////// data_set_info ///////////////////////////
+//
+// Info for data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_info = "Created by Nc2Mdv";
+

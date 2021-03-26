@@ -1,0 +1,27 @@
+## Based on Tracks2xml2 by Niles Oien May 2003, MODIFIED BY T. RAUPACH, UNIBE, 2018-2019.
+## See LICENSE.txt.
+
+commentdef {
+  p_header = "Take a TITAN storm file and convert all its storm tracks\n"
+  	   "to ASCII. Based on Tracks2xml2 by Niles Oien May 2003,\n"
+	   "modified by T. Raupach 2018.";
+}
+
+paramdef boolean {
+  p_descr = "Set to print more messages as data are processed.";
+  p_help = "Can usually be FALSE"; 
+  p_default = FALSE;
+} debug;
+
+paramdef string {
+  p_descr = "Instance to check in to Procmap with";
+  p_help = "Set to something unique."; 
+  p_default = {"primary"};
+} Instance;
+
+paramdef string {
+  p_descr = "Output directory.";
+  p_help = "Output file(s) written here. "; 
+  p_default = {"./"};
+} outDir;
+

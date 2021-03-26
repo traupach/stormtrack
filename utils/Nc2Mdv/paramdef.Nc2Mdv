@@ -1,0 +1,220 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions for Nc2Mdv
+//
+// Mike Dixon, RAP, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2011
+//
+// MODIFIED from NcGeneric2Mdv BY T. RAUPACH, UNIBE, 2018-2019.
+
+commentdef {
+  p_header = "Nc2Mdv converts NetCDF files to MDV format.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_NORM;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to register with procmap while running.";
+  p_help = "See 'instance'.";
+} register_with_procmap;
+
+paramdef int {
+  p_default = 60;
+  p_descr = "Registration interval.";
+  p_help = "The number of seconds between expected procmap registrations.";
+} reg_interval;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+commentdef {
+  p_header = "NETCDF dimensions";
+  p_text = "Specify the names used in the netCDF file for dimensions, since they can vary depending on the application used to create the file.";
+}
+
+paramdef string {
+  p_default = "Time";
+  p_descr = "name for netCDF dimension for time.";
+} netcdf_dim_time;
+
+paramdef string {
+  p_default = "lon";
+  p_descr = "netCDF dimension name for grid points in longitude.";
+} netcdf_dim_x;
+
+paramdef string {
+  p_default = "lat";
+  p_descr = "netCDF dimension name for grid points in latitude.";
+} netcdf_dim_y;
+
+paramdef string {
+  p_default = "interp_levels";
+  p_descr = "netCDF dimension name for grid points in altitude.";
+  p_descr = "Specify 'none' if there is no Z dimension.";
+} netcdf_dim_z;
+
+commentdef {
+  p_header = "NETCDF variables";
+  p_text = "Specify the names used in the netCDF file for variables, since they can vary depending on the application used to create the file.";
+}
+
+paramdef string {
+  p_default = "none";
+  p_descr = "Data set times are relative to this base time";
+  p_help = "Specify 'none' if there is no base time variable. In this case the time will be taken as absolute, using the units specified in the file.";
+} netcdf_var_base_time;
+
+paramdef string {
+  p_default = "1970-01-01T00:00:00Z";
+  p_descr = "Base time string - used if netcdf_var_base_time is set to 'none'.";
+  p_help = "Set this to a W3C ISO 8601 time - see http://www.w3.org/TR/NOTE-datetime";
+} base_time_string;
+
+paramdef string {
+  p_default = "time";
+  p_descr = "Time offset relative to base_time, or unix_time if base_time is 'none'.";
+} netcdf_var_time_offset;
+
+paramdef string {
+  p_default = "interp_levels";
+  p_descr = "Z variable name";
+  p_descr = "Specify 'none' if there is no Z dimension.";
+} netcdf_var_z;
+
+paramdef string {
+  p_default = "lat";
+  p_descr = "Y variable name";
+} netcdf_var_y;
+
+paramdef string {
+  p_default = "lon";
+  p_descr = "X variable name";
+} netcdf_var_x;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to consider ncbyte fields as unsigned.";
+  p_help = "Normally ncbyte fields are signed. If this field is set to TRUE, they are treated as unsigned instead.";
+} treat_ncbyte_as_unsigned;
+
+commentdef {
+  p_header = "INPUT PROJECTION";
+}
+
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_params_t;
+
+commentdef {
+  p_header = "OUTPUT LOCATION";
+}
+
+paramdef string {
+  p_default = "mdvp:://localhost::mdv";
+  p_descr = "URL for writing output files.";
+} output_url;
+
+commentdef {
+  p_header = "OUTPUT ENCODING AND COMPRESSION";
+}
+
+typedef enum {
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_INT16;
+  p_descr = "Set output encoding type.";
+} output_encoding_type;
+
+typedef enum {
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4,
+  COMPRESSION_GZIP =  5,
+  COMPRESSION_GZIP_VOL = 6
+} compression_type_t;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "Set output compression type.";
+  p_help = "See <toolsa/compress> for details on the compression types.";
+} output_compression_type;
+
+commentdef {
+  p_header = "OUTPUT METADATA STRINGS";
+  p_text = "These will be used if the file does not contain suitable information.";
+}
+
+paramdef string {
+  p_default = "WRF output";
+  p_descr = "Name of data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_name;
+
+paramdef string {
+  p_default = "University of Bern";
+  p_descr = "Source of data.";
+  p_help = "Appears in Mdv master header.";
+} data_set_source;
+
+paramdef string {
+  p_default = "Created by Nc2Mdv";
+  p_descr = "Info for data set.";
+  p_help = "Appears in Mdv master header.";
+} data_set_info;
+

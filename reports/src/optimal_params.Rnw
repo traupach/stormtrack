@@ -1,0 +1,249 @@
+\documentclass[12pt]{article}
+
+\usepackage{times}
+\usepackage{fullpage}
+\usepackage{placeins}
+
+<<setup, cache=FALSE, include=FALSE>>=
+rm(list=ls())
+wd = getwd()
+setwd("~/git/stormtrack/code/R/library/")
+for(file in list.files(pattern="*.R"))
+    source(file)
+setwd(wd) 
+rm(list=c("wd", "file"))
+@ 
+
+<<settings, echo=FALSE, cache=TRUE>>=
+param_test_dir = "~/wrf/thompson/param_test/"                 ## Parameter test base dir.
+titanFile = "tracks_20180530.csv"                       ## Track file name.
+trtBase = "~/trt/"                                      ## Base TRT result dir.
+trtDir = paste(trtBase, "TRT_meta_2018_Rdata/", sep="") ## TRT metadata dir.
+minDuration = 30                                        ## Minimum track duration [min] to use.
+@ 
+
+\title{Optimal TITAN parameters}
+\author{Tim Raupach}
+\date{Generated \today{}}
+
+\begin{document}
+
+\maketitle
+
+<<readResults, echo=FALSE, cache=TRUE, dependson="settings", include=FALSE>>=
+testDirs = list.files(param_test_dir, pattern="storms_.*", full.names=TRUE)
+testNames = basename(testDirs)
+dat = readTrackerData(titanDirs=testDirs, titanNames=testNames, trtDir=trtDir, 
+                      titanFile=titanFile, minDuration=minDuration, copyAllRegions=FALSE)
+
+removedNullSpeed = nrow(dat$all[is.na(speed)])
+dat$all = dat$all[!is.na(speed)]
+@ 
+
+<<setProperties, echo=FALSE, cache=TRUE, dependson="settings">>=
+setProps = data.table(set=dat$all[set != "TRT", unique(set)])
+setProps[, lowdBZ := as.numeric(str_match(set, ".*_([0-9]+)_[0-9]+_[0-9]+.*")[,2])]
+setProps[, dualdBZ := as.numeric(str_match(set, ".*_[0-9]+_([0-9]+)_[0-9]+.*")[,2])]
+setProps[, minSize := as.numeric(str_match(set, ".*_[0-9]+_[0-9]+_([0-9]+).*")[,2])]
+setkey(setProps, set)
+@ 
+
+<<compareNumberCells, echo=FALSE, cache=TRUE, dependson="settings">>=
+dat$all[, datehour := paste(day, hour, sep="_")]
+
+cells = dat$all[, list(numCells=length(unique(trackID)),
+                       medianArea=median(area),
+                       meanArea=mean(area),
+                       timestamp=min(timestamp)), by=c("datehour", "set")]
+otherSets = cells[set != "TRT", unique(set)]
+
+allStats = NULL
+for(s in otherSets) {
+    res = setComparison(ref=cells[set == "TRT"], res=cells[set == s], col="numCells", 
+                        missing=0, key="datehour", groupBy=NULL)$stats
+    res = data.table(res, set=s)
+    allStats =rbind(allStats, res)
+}
+
+setkey(allStats, set)
+allStats[, lowdBZ := setProps[allStats, lowdBZ]]
+allStats[, dualdBZ := setProps[allStats, dualdBZ]]
+allStats[, minSize := setProps[allStats, minSize]]
+ 
+areaStats = NULL
+for(s in otherSets) {
+    res = setComparison(ref=cells[set == "TRT"], res=cells[set == s], col="medianArea",
+                        missing=0, key="datehour", groupBy=NULL)$stats
+    res = data.table(res, set=s)
+    areaStats =rbind(areaStats, res)
+}
+setkey(areaStats, set)
+
+setnames(areaStats, "medRB", "areaMedRB")
+allStats[, areaMedRB := areaStats[allStats, areaMedRB]] 
+@ 
+
+<<selectSet, echo=FALSE, results="asis">>=
+bestPerc = 10
+winner = allStats[abs(medRB) <= quantile(abs(medRB), probs=bestPerc/100)][abs(areaMedRB) <= quantile(abs(areaMedRB), probs=bestPerc/100)][which.max(r2)]
+@ 
+
+<<escapeDir, echo=FALSE>>=
+escaped_dir = gsub("_", "\\\\_", param_test_dir)
+escaped_dir = gsub("~", "$\\\\sim$", escaped_dir)
+@ 
+
+\begin{itemize}
+\item Parameter tests results reside in \texttt{\Sexpr{escaped_dir}}.
+\item Over all tests, TITAN (TRT) tracks were cut short \Sexpr{dat$shortTracksPercTITAN}\% (\Sexpr{dat$shortTracksPercTRT}\%) of the time.
+\item Over all tests, TITAN (TRT) tracks were split \Sexpr{dat$splitChangesPercTITAN}\% (\Sexpr{dat$splitChangesPercTRT}\%) of the time.
+\item Tracks included in these results had a minimum duration of \Sexpr{dat$minDuration} minutes.
+\item The low dBZ threshold was tested from \Sexpr{setProps[, min(lowdBZ)]} dBZ to \Sexpr{setProps[,
+    max(lowdBZ)]} dBZ.
+\item The dual dBZ threshold was tested from \Sexpr{setProps[, min(dualdBZ-lowdBZ)]} dBZ to
+  \Sexpr{setProps[, max(dualdBZ-lowdBZ)]} dBZ above the low threshold.
+\item Minimum storm area threshold was tested for \Sexpr{paste(setProps[, unique(minSize),
+    keyby=minSize][, minSize], collapse=", ")} km$^3$ (note this is actually a threshold on volume
+  for TITAN).
+\item Area comparison in this document shows the TITAN ``projected area'' (2D) compared to TRT 2D
+  storm area.
+\item To select the ``best'' parameter set, we subset the results to those with:
+  
+  \begin{itemize}
+  \item absolute value of median relative bias on number of cells per hour within the best \Sexpr{bestPerc}\% of values, THEN subset for
+  \item absolute value of median relative bias for daily median cell area within the best \Sexpr{bestPerc}\% of values.
+  \end{itemize}
+  
+  Then we choose the configuration with the best $r^2$ value for per time-step number of cells.
+\item The best parameters are:
+
+<<winnerTable, results="asis", echo=FALSE>>=
+winner[, set := NULL]
+bestParams = winner[, list("Low dBZ thresh. [dBZ]"=lowdBZ, 
+                           "Dual dBZ thresh. [dBZ]"=dualdBZ, 
+                           "Min storm size [km$^3$]"=minSize)]
+print(xtable(bestParams), include.rownames=FALSE, sanitize.text.function=identity)
+@ 
+
+\item The ``winning'' statistics are (on cells per hour):
+
+<<winnerTableStats, results="asis", echo=FALSE>>=
+bestStats = winner[, list("Cell number bias [cells/hour]"=bias,
+                          "Cell number RMSE [cells/hour]"=RMSE,
+                          "Cell number mean rel. bias [\\%]"=meanRB, 
+                          "Cell number median rel. bias [\\%]"=medRB,
+                          "Cell number rel. bias IQR [\\% pts]"=RBIQR,
+                          "Cell number r$^2$ [-]"=r2,
+                          "Mean area, median rel. bias [\\%]"=areaMedRB)]
+bestStats = melt(bestStats, measure.vars=names(bestStats))
+names(bestStats) = c("Statistic", "Result")
+print(xtable(bestStats), include.rownames=FALSE, sanitize.text.function=identity)
+allStats = allStats[, minSize := paste(minSize, "~km^3", sep="")]
+winner = winner[, minSize := paste(minSize, "~km^3", sep="")]
+@ 
+\end{itemize}
+
+\FloatBarrier
+
+<<r2plot, fig.height=3, echo=FALSE, fig.cap=paste("Cell number correlation coefficient results, with a red dot showing the selected configuration.", sep="")>>=
+ggplot(allStats, aes(x=lowdBZ, y=dualdBZ)) + 
+    geom_tile(aes(fill=r2), size=1) +
+    geom_point(data=winner, colour="red", size=0.5) +
+    facet_wrap(~minSize, labeller=label_parsed) +
+    scale_fill_gradientn(colours=topo.colors(100)) +
+    theme_bw(11) +
+    labs(x="Low dBZ threshold [dBZ]", y="Dual dBZ threshold [dBZ]",
+         title="Cell number correlation coefficient")
+@ 
+
+<<biasPlot, fig.height=3, echo=FALSE, fig.cap=paste("Cell number bias (mean difference) results, with a red dot showing the selected configuration.", sep="")>>=
+ggplot(allStats, aes(x=lowdBZ, y=dualdBZ)) + 
+    geom_tile(aes(fill=bias, ), size=1) +
+    geom_point(data=winner, colour="red", size=0.5) +
+    facet_wrap(~minSize, labeller=label_parsed) +
+    scale_fill_gradient2(name="Bias [cells]") +
+    theme_bw(11) +
+    labs(x="Low dBZ threshold [dBZ]", y="Dual dBZ threshold [dBZ]",
+         title="Cell number bias")
+@ 
+
+<<medRBPlot, fig.height=3, echo=FALSE, fig.cap=paste("Cell number median relative bias results, with a red dot showing the selected configuration.", sep="")>>=
+ggplot(allStats, aes(x=lowdBZ, y=dualdBZ)) + 
+    geom_tile(aes(fill=medRB), size=1) +
+    geom_point(data=winner, colour="red", size=0.5) +
+    facet_wrap(~minSize, labeller=label_parsed) +
+    scale_fill_gradient2(name="Med. RB [%]") +
+    theme_bw(11) + 
+    labs(x="Low dBZ threshold [dBZ]", y="Dual dBZ threshold [dBZ]",
+         title="Cell number median relative bias")
+@ 
+
+<<RBIQRPlot, fig.height=3, echo=FALSE, fig.cap=paste("Cell number relative bias IQR results, with a red dot showing the selected configuration.", sep="")>>=
+ggplot(allStats, aes(x=lowdBZ, y=dualdBZ)) + 
+    geom_tile(aes(fill=RBIQR), size=1) +
+    geom_point(data=winner, colour="red", size=0.5) +              
+    facet_wrap(~minSize, labeller=label_parsed) +
+    scale_fill_gradientn(name="Med. RB IQR [% pts]", colours=topo.colors(100)) +
+    theme_bw(11) + 
+    labs(x="Low dBZ threshold [dBZ]", y="Dual dBZ threshold [dBZ]",
+         title="Cell number relative bias IQR")
+@ 
+
+<<areaDiffPlot, fig.height=3, echo=FALSE, fig.cap=paste("Difference in area distributions, with a red dot showing the selected configuration.", sep="")>>=
+ggplot(allStats, aes(x=lowdBZ, y=dualdBZ)) + 
+    geom_tile(aes(fill=areaMedRB), size=1) +
+    geom_point(data=winner, colour="red", size=0.5) +
+    facet_wrap(~minSize, labeller=label_parsed) +
+    scale_fill_gradientn(name="Daily-area RB [km^3]", colours=topo.colors(100)) +
+    theme_bw(11) + 
+    labs(x="Low dBZ threshold [dBZ]", y="Dual dBZ threshold [dBZ]",
+         title="Median bias of daily median of cell area")
+@ 
+
+<<winningTShourly, echo=FALSE, fig.height=3, fig.cap="Timeseries of number of cells by time step, for TRT vs. the winning parameter set.">>=
+winningSet = allStats[lowdBZ == winner$lowdBZ &
+            dualdBZ == winner$dualdBZ &
+            minSize == winner$minSize, set]
+
+ggplot(cells[set %in% c("TRT", winningSet)], aes(x=timestamp, y=numCells)) +
+    geom_line(size=0.75, aes(colour=set)) +
+    labs(title="Reference number of cells compared to winning simulation",
+         x="Time (UTC)", y="Number of cells") +
+    theme_bw(11)
+@ 
+
+<<winningTS, echo=FALSE, fig.height=3, fig.cap="Timeseries of number of cells by time step, for TRT vs. the winning parameter set.">>=
+winningSet = allStats[lowdBZ == winner$lowdBZ &
+                      dualdBZ == winner$dualdBZ &
+                      minSize == winner$minSize, set]
+
+numCells = dat$all[, list(numCells=length(unique(trackID))), by=c("timestamp", "set")]
+
+ggplot(numCells[set %in% c("TRT", winningSet)], aes(x=timestamp, y=numCells)) +
+    geom_line(size=0.75, aes(colour=set)) +
+    labs(title="Reference number of cells compared to winning simulation",
+         x="Time (UTC)", y="Number of cells") +
+    theme_bw(11)
+@ 
+
+<<areaDistComp, echo=FALSE, fig.height=2.5, fig.cap="Area distributions for TRT vs. winning parameter results.">>=
+ggplot(dat$all[set %in% c("TRT", winningSet)], aes(x=area)) +
+    geom_density(aes(fill=set), alpha=0.5) +
+    labs(title="Reference vs winning simulation area distributions",
+         x="Cell area [km2]", y="Density") + theme_bw(11)
+@ 
+
+<<winnerQQ, fig.height=3, echo=FALSE, fig.cap="QQ plots for all cells. Dashed vertical lines show the 5th and 95th percentile of TRT values.">>=
+winnerSet = dat$all[set %in% c("TRT", winningSet)]
+winnerSet[set == winningSet, set := "WRF+TITAN"]
+compareDistributions(dat=winnerSet, refSet="TRT", logScale=FALSE, by=NULL) + 
+    theme(legend.position="bottom") + guides(colour=FALSE, linetype=FALSE)
+@ 
+
+<<winnerQQByRegion, fig.height=4, echo=FALSE, fig.cap="QQ plots for cell properties by region. Dashed vertical lines show the 5th and 95th percentile of TRT values.", warning=FALSE>>=
+compareDistributions(dat=winnerSet, refSet="TRT", logScale=FALSE, by="region") + 
+    theme(legend.position="bottom") +
+    guides(colour=guide_legend(ncol=4), linetype=guide_legend(nrow=2))
+@ 
+
+\end{document}
