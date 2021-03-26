@@ -28,4 +28,4 @@ Structure:
 - [params](params) -- parameter files for LROSE utilities.
 - [utils](utils) -- versions of LROSE code modified to work with the WRF storm tracking workflow.
 - [WRF_config](WRF_config) -- WRF namelist.input files used for each microphysical scheme.
-- [data](data) -- support data for storm tracking, including [subdomain definitions](data/domains).
+- [data](data) -- support data for storm tracking (subdomain definitions).
