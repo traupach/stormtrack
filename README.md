@@ -26,6 +26,6 @@ Structure:
 - [code](code) -- scripts, split into ncl, R, and sh.
 - [doc](doc) -- documentation.
 - [params](params) -- parameter files for LROSE utilities.
-- [utils](utils) -- versions of LROSE code modified to work with the WRF storm tracking workflow, with their own licenses.
+- [utils](utils) -- **modified versions** of LROSE code, for the WRF storm tracking workflow, with their own licenses.
 - [WRF_config](WRF_config) -- WRF namelist.input file and information.
 - [data](data) -- support data for storm tracking (subdomain definitions).
