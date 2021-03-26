@@ -3,7 +3,7 @@ Code and documentation for tracking simulated thunderstorms in WRF output.
 
 Tim Raupach <timothy.h.raupach@gmail.com>  
 
-Until 31.12.2019: Institute of Geography and Oeschger Centre for Climate Change Research, University of Bern, Bern, Switzerland.
+Until 31.12.2019: Institute of Geography and Oeschger Centre for Climate Change Research, University of Bern, Bern, Switzerland.\
 Current affiliation: Centre for Climate Change Research, UNSW Sydney, Sydney, Australia.
 
 Licenses:
