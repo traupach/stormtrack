@@ -7,7 +7,7 @@ Until 31.12.2019: Institute of Geography and Oeschger Centre for Climate Change 
 Current affiliation: Centre for Climate Change Research, UNSW Sydney, Sydney, Australia.
 
 Licenses:
- - This repository is covered by an open source [license](LICENSE), with the exception of the code under the [utils](utils/) section which is covered by the LROSE BSD license (see `LICENSE.txt` in each subdirectory).
+ - This repository is covered by an open source [license](LICENSE), **with the exception of the code under the [utils](utils/) section which is covered by the LROSE BSD license (see `LICENSE.txt` in each subdirectory)**.
 
 Documentation - setup:
 
