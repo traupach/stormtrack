@@ -2,7 +2,12 @@
 Code and documentation for tracking simulated thunderstorms in WRF output.
 
 Tim Raupach <timothy.h.raupach@gmail.com>  
-Institute of Geography and Oeschger Centre for Climate Change Research, University of Bern, Bern, Switzerland.
+
+Until 31.12.2019: Institute of Geography and Oeschger Centre for Climate Change Research, University of Bern, Bern, Switzerland.\
+Current affiliation: Centre for Climate Change Research, UNSW Sydney, Sydney, Australia.
+
+Licenses:
+ - This repository is covered by an open source [license](LICENSE), **with the exception of the code under the [utils](utils/) section which is covered by the LROSE BSD license (see `LICENSE.txt` in each subdirectory)**.
 
 Documentation - setup:
 
@@ -21,6 +26,6 @@ Structure:
 - [code](code) -- scripts, split into ncl, R, and sh.
 - [doc](doc) -- documentation.
 - [params](params) -- parameter files for LROSE utilities.
-- [utils](utils) -- versions of LROSE code modified to work with the WRF storm tracking workflow.
-- [WRF_config](WRF_config) -- WRF namelist.input files used for each microphysical scheme.
-- [data](data) -- support data for storm tracking, including [subdomain definitions](data/domains).
+- [utils](utils) -- **modified versions** of LROSE code, for the WRF storm tracking workflow, with their own licenses.
+- [WRF_config](WRF_config) -- WRF namelist.input file and information.
+- [data](data) -- support data for storm tracking (subdomain definitions).
