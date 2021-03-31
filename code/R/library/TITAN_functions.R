@@ -546,7 +546,8 @@ addHailInfo = function(dat, simDirs, simNames, hailFile="tracks/track_hail_data.
     ## add it to a track information data.table.
     ##
     ## Args:
-    ##   dat: Track data.
+    ##   dat: Track data. Expects a column original_trackID which is the
+    ##        original TITAN track ID.
     ##   simDirs: Directories for each microphysical scheme.
     ##   simNames: Names of each scheme, should match "scheme" in dat.
     ##   hailFile: The relative path of the hail file for each scheme to read.
@@ -574,9 +575,14 @@ addHailInfo = function(dat, simDirs, simNames, hailFile="tracks/track_hail_data.
         dat[, nPix := NA]
         return(dat)
     }
-    
-    setkey(dat, scheme, timestamp, trackID)
-    setkey(hail, scheme, timestamp, trackID)
+
+    # Rename hail's trackID to original_trackID, since the hail
+    # datasets have not had splits/ROI etc taken into account.
+    hail[, original_trackID := trackID]
+    hail[, trackID := NULL]
+
+    setkey(dat, scheme, timestamp, original_trackID)
+    setkey(hail, scheme, timestamp, original_trackID)
             
     res = hail[dat]
     stopifnot(nrow(res) == nrow(dat))

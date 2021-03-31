@@ -234,6 +234,9 @@ fixSplitTracks = function(tracks, expectedDiff=300) {
     ## Ensure the tracks are stored in time order.
     setkey(tracks, trackID, timestamp)
     
+    ## Keep a copy of original track IDs.
+    tracks[, original_trackID := trackID]
+
     ## Time differences in seconds. Tracks with an unusual time difference have been split.
     tracks[, split := !all(diff(as.numeric(timestamp)) == expectedDiff), by=trackID]
 
@@ -281,7 +284,6 @@ fixSplitTracks = function(tracks, expectedDiff=300) {
     ## Redo number of subtracks in case some are removed.
     if(all(c("stormID", "numTracks") %in% names(tracks)))
         tracks[, numTracks := length(unique(trackID)), by=stormID]
-
     
     ## Remove history information, since splits affect it.
     if(any(c("history", "historyInScans", "originTime") %in% names(tracks))) {
