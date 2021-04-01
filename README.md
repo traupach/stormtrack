@@ -23,9 +23,11 @@ Documentation - running:
 
 Structure:
 
+- [WRF_config](WRF_config) -- WRF namelist.input file and information.
 - [code](code) -- scripts, split into ncl, R, and sh.
+- [data](data) -- support data for storm tracking (subdomain definitions).
 - [doc](doc) -- documentation.
 - [params](params) -- parameter files for LROSE utilities.
+- [threshold_optimisation](threshold_optimisation) -- reports showing TITAN threshold optimisation.
 - [utils](utils) -- **modified versions** of LROSE code, for the WRF storm tracking workflow, with their own licenses.
-- [WRF_config](WRF_config) -- WRF namelist.input file and information.
-- [data](data) -- support data for storm tracking (subdomain definitions).
+
