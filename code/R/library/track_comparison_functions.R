@@ -35,10 +35,10 @@ comparisonDataSummaryTable = function(dat, refSet, reg="All",
                                                            format="%Y-%m-%d %H:%M")),
                       by=c("set", simNameColName)]
     
-    names(dataSummary) = c("Method", "Scheme", "Num. cells", "Num. tracks", 
+    names(dataSummary) = c("Method", "Scheme", "Num. detections", "Num. cells", 
                            "First cell (UTC)", "Last cell (UTC)") 
 
-    print(xtable(dataSummary[, c("Method", "Num. cells", "Num. tracks", 
+    print(xtable(dataSummary[, c("Method", "Num. detections", "Num. cells", 
                                  "First cell (UTC)", "Last cell (UTC)"), with=FALSE],
                  caption=caption, label=label), booktabs=booktabs,
           include.rownames=FALSE, table.placement=placement,
@@ -53,27 +53,27 @@ comparisonDataSummaryTable = function(dat, refSet, reg="All",
         compTracks = ""
 
         if(length(testSets) == 1) {
-                compCells = compNumbers(test=dataSummary[Method==testSets, "Num. cells", with=FALSE],
-                                        than=dataSummary[Method==refSet, "Num. cells", with=FALSE],
-                                        what=" individual cells")
+                compCells = compNumbers(test=dataSummary[Method==testSets, "Num. detections", with=FALSE],
+                                        than=dataSummary[Method==refSet, "Num. detections", with=FALSE],
+                                        what=" detections")
                 compTracks = compNumbers(test=dataSummary[Method==testSets,
-                                                          "Num. tracks", with=FALSE],
-                                         than=dataSummary[Method==refSet, "Num. tracks", with=FALSE],
+                                                          "Num. cells", with=FALSE],
+                                         than=dataSummary[Method==refSet, "Num. cells", with=FALSE],
                                          what=" tracks")
         } else {
             for(s in testSets) {
                 compCells = paste(compCells,
-                                  compNumbers(test=dataSummary[Method==s, "Num. cells", with=FALSE],
-                                              than=dataSummary[Method==refSet, "Num. cells",
+                                  compNumbers(test=dataSummary[Method==s, "Num. detections", with=FALSE],
+                                              than=dataSummary[Method==refSet, "Num. detections",
                                                                with=FALSE],
-                                              what=" individual cells"),
+                                              what=" detections"),
                                   "for the", dataSummary[Method==s, Scheme], simNameColName)
                 
                 compTracks = paste(compTracks,
-                                   compNumbers(test=dataSummary[Method==s, "Num. tracks", with=FALSE],
-                                               than=dataSummary[Method==refSet, "Num. tracks",
+                                   compNumbers(test=dataSummary[Method==s, "Num. cells", with=FALSE],
+                                               than=dataSummary[Method==refSet, "Num. cells",
                                                                 with=FALSE],
-                                               what=" tracks"),
+                                               what=" cells"),
                                    "for the", dataSummary[Method==s, Scheme], simNameColName)
                 
                 if(s != testSets[length(testSets)] &&
