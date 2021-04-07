@@ -32,3 +32,5 @@ Structure:
 LROSE utilites:
 
 - Modified versions of LROSE utilities that are used in this project are available under a [separate repository](https://github.com/traupach/modified_LROSE_utils). Parameter files for the LROSE utilities, including optimisted parameter files per microphysics scheme, are available under that repository.
+
+[![DOI](https://zenodo.org/badge/351652362.svg)](https://zenodo.org/badge/latestdoi/351652362)
