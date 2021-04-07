@@ -28,7 +28,6 @@ Structure:
 - [data](data) -- support data for storm tracking (subdomain definitions).
 - [doc](doc) -- documentation.
 - [threshold_optimisation](threshold_optimisation) -- reports showing TITAN threshold optimisation.
-- [manuscript](manuscript) -- R markdown code for generation of the manuscript describing this work.
 
 LROSE utilites:
 
